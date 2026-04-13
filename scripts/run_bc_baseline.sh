@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:a40:1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=8:00:00
+#SBATCH --job-name=maze_bc
+#SBATCH --output=logs/maze_bc_%j.out
+#SBATCH --error=logs/maze_bc_%j.err
+
+module load conda
+eval "$(conda shell.bash hook)"
+conda activate LLM_RL
+
+export OPENBLAS_NUM_THREADS=1
+
+cd /project2/jieyuz_1727/Maize-RL/LMRL-Gym
+
+mkdir -p logs outputs
+
+python -m llm_rl_scripts.maze.bc.fully_observed_bc \
+    HF gpt2 \
+    data/fully_observed_filtered_maze_data.jsonl \
+    --outputs_path=outputs/baseline/ \
+    --exp_name=fo_bc_gpt2_small \
+    --epochs 500 \
+    --lr 1e-4 \
+    --train_bsize 128 \
+    --eval_every_steps 256 \
+    --save_best \
+    --save_at_end
