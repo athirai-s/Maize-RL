@@ -34,8 +34,8 @@ mkdir -p logs outputs/ppo_baseline
     --describe-function=describe_observation_give_position \
     --reward-function=standard_reward \
     --n-rounds=50 \
-    --epochs=4 \
-    --lr=1e-5 \
+    --epochs=2 \
+    --lr=1e-6 \
     --train-bsize=8 \
     --grad-accum-steps=4 \
     --rollout-bsize=16 \
@@ -43,7 +43,7 @@ mkdir -p logs outputs/ppo_baseline
     --ppo-data-bsize=16 \
     --max-input-length=128 \
     --max-output-length=8 \
-    --init-kl-coef=0.001 \
+    --init-kl-coef=0.05 \
     --gamma=0.99 \
     --lam=0.95 \
     --cliprange=0.2 \
