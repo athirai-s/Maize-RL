@@ -4,9 +4,9 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
-#SBATCH --job-name=maze_ppo
-#SBATCH --output=logs/maze_ppo_%j.out
-#SBATCH --error=logs/maze_ppo_%j.err
+#SBATCH --job-name=maze_ppo_po
+#SBATCH --output=logs/maze_ppo_po_%j.out
+#SBATCH --error=logs/maze_ppo_po_%j.err
 
 module load conda
 source activate LLM_RL || eval "$(conda shell.bash hook)" && conda activate LLM_RL
@@ -24,14 +24,14 @@ export XLA_PYTHON_CLIENT_PREALLOCATE=false
 
 cd /project2/jieyuz_1727/Maize-RL/LMRL-Gym
 
-mkdir -p logs outputs/ppo_baseline
+mkdir -p logs outputs/ppo_po_baseline
 
 /home1/ashanmug/.conda/envs/LLM_RL/bin/python -m llm_rl_scripts.maze.ppo.train_ppo_online \
     HF gpt2 \
-    --outputs-path=/project2/jieyuz_1727/Maize-RL/LMRL-Gym/outputs/ppo_baseline/ \
+    --outputs-path=/project2/jieyuz_1727/Maize-RL/LMRL-Gym/outputs/ppo_po_baseline/ \
     --exp-name=ppo_gpt2_small_po \
     --maze-name=double_t_maze \
-    --describe-function=describe_observation_give_position \
+    --describe-function=describe_observation \
     --reward-function=standard_reward \
     --n-rounds=50 \
     --epochs=1 \
