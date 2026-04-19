@@ -21,6 +21,7 @@ CONDA_ENV=/home1/ashanmug/.conda/envs/LLM_RL
 NVDIR=$CONDA_ENV/lib/python3.9/site-packages/nvidia
 export LD_LIBRARY_PATH=$NVDIR/cudnn/lib:$NVDIR/cublas/lib:$NVDIR/cuda_runtime/lib:$NVDIR/cuda_cupti/lib:$NVDIR/cuda_nvrtc/lib:$NVDIR/cufft/lib:$NVDIR/cusolver/lib:$NVDIR/cusparse/lib:$LD_LIBRARY_PATH
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export XLA_FLAGS="--xla_gpu_enable_command_buffer="
 
 cd /project2/jieyuz_1727/Maize-RL/LMRL-Gym
 
@@ -31,7 +32,7 @@ mkdir -p logs outputs/ppo_po_baseline
     --outputs-path=/project2/jieyuz_1727/Maize-RL/LMRL-Gym/outputs/ppo_po_baseline/ \
     --exp-name=ppo_gpt2_small_po \
     --maze-name=double_t_maze \
-    --describe-function=describe_observation \
+    --describe-function=describe_observation_only_walls \
     --reward-function=standard_reward \
     --n-rounds=50 \
     --epochs=1 \
