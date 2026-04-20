@@ -42,5 +42,7 @@ fi
     --epochs=500 \
     --lr=1e-4 \
     --train-bsize=128 \
+    --max-input-length=1016 \
+    --max-output-length=8 \
     --eval-every-steps=256 \
     --save-at-end

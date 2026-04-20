@@ -49,11 +49,8 @@ cd /project2/jieyuz_1727/Maize-RL/LMRL-Gym
 /home1/ashanmug/.conda/envs/LLM_RL/bin/python -m llm_rl_scripts.maze.bc.eval_bc \
     PARAMS "$CKPT_DIR" \
     --outputs-path=/project2/jieyuz_1727/Maize-RL/LMRL-Gym/outputs/eval_ppo_po_pretrained/ \
-    --fully-observed=False \
+    --no-fully-observed \
     --policy-n-rollouts=32 \
     --policy-bsize=1 \
     --policy-max-input-length=256 \
-    --policy-max-output-length=8 \
-    --policy-do-sample=True \
-    --do-reward-eval=True \
-    --do-accuracy-eval=True
+    --policy-max-output-length=8
