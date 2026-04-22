@@ -25,13 +25,14 @@ export XLA_FLAGS="--xla_gpu_enable_command_buffer="
 
 cd /project2/jieyuz_1727/Maize-RL/LMRL-Gym
 
-mkdir -p logs outputs/ppo_po_from_bc
+mkdir -p logs
+mkdir -p /scratch1/ashanmug/maize-rl/outputs/ppo_po_from_bc
 
-BC_CKPT=/project2/jieyuz_1727/Maize-RL/LMRL-Gym/checkpoints/bc_po_v2/best
+BC_CKPT=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/po_bc_gpt2_small/best
 
 /home1/ashanmug/.conda/envs/LLM_RL/bin/python -m llm_rl_scripts.maze.ppo.train_ppo_online \
     PARAMS "$BC_CKPT" \
-    --outputs-path=/project2/jieyuz_1727/Maize-RL/LMRL-Gym/outputs/ppo_po_from_bc/ \
+    --outputs-path=/scratch1/ashanmug/maize-rl/outputs/ppo_po_from_bc/ \
     --exp-name=ppo_po_from_bc \
     --maze-name=double_t_maze \
     --describe-function=describe_observation_only_walls \

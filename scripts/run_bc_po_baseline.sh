@@ -37,7 +37,7 @@ fi
     HF gpt2 \
     "$DATA_FILE" \
     0.9 \
-    --outputs-path=/project2/jieyuz_1727/Maize-RL/LMRL-Gym/outputs/bc_po_baseline/ \
+    --outputs-path=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/ \
     --exp-name=po_bc_gpt2_small \
     --epochs=50 \
     --lr=1e-4 \
