@@ -39,10 +39,14 @@ fi
     0.9 \
     --outputs-path=/project2/jieyuz_1727/Maize-RL/LMRL-Gym/outputs/bc_po_baseline/ \
     --exp-name=po_bc_gpt2_small \
-    --epochs=500 \
+    --epochs=50 \
     --lr=1e-4 \
-    --train-bsize=128 \
+    --train-bsize=16 \
+    --grad-accum-steps=8 \
     --max-input-length=1016 \
     --max-output-length=8 \
     --eval-every-steps=256 \
-    --save-at-end
+    --save-every-steps=500 \
+    --save-at-end \
+    --no-save-train-state \
+    --bf16-activations
