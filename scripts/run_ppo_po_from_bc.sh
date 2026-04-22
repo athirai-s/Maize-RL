@@ -28,7 +28,7 @@ cd /project2/jieyuz_1727/Maize-RL/LMRL-Gym
 mkdir -p logs
 mkdir -p /scratch1/ashanmug/maize-rl/outputs/ppo_po_from_bc
 
-BC_CKPT=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/po_bc_gpt2_small/best
+BC_CKPT=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/po_bc_gpt2_small.2026-04-22-19-16-19.436.bdfc01ac3e7f11f18ff770b5e8f03870/best
 
 /home1/ashanmug/.conda/envs/LLM_RL/bin/python -m llm_rl_scripts.maze.ppo.train_ppo_online \
     PARAMS "$BC_CKPT" \

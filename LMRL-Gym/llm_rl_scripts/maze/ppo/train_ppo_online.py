@@ -410,7 +410,11 @@ def main(
             num_correct = 0
             for position in positions:
                 env.position = position
-                observation = describe_observation_give_position(maze, position, env.goal)
+                if describe_function == "describe_observation_only_walls":
+                    from llm_rl_scripts.maze.env.env import describe_observation_only_walls
+                    observation = describe_observation_only_walls(maze, position, env.goal)
+                else:
+                    observation = describe_observation_give_position(maze, position, env.goal)
                 text_history = (Text(observation, False),)
                 # embed()
                 # if reranker:
