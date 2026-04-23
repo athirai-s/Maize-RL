@@ -443,33 +443,18 @@ class GPT2PPOPolicyMultimodal(PPOPolicy):
         if self.generation_config is not None and self.generation_config.eos_token_id is not None:
             eos_token = self.inference.tokenizer.decode(self.generation_config.eos_token_id)
         raw_input_strs = [eos_token if d else self.in_str_process(text_history_to_str(item)) for item, d in zip(text_history, done)]
-        patches = np.stack([np.ones((self.inference.patch_size, self.inference.patch_size), dtype=np.int32) if d or item is None else _extract_last_patch_from_history(item, self.inference.patch_size) for item, d in zip(text_history, done)], axis=0)
         new_key = None
         if self.prng_key is not None:
             self.prng_key, new_key = jax.random.split(self.prng_key)
-        # Best-effort multimodal generation; fall back to text-only generation if backend generate(inputs_embeds=...) is unsupported.
-        try:
-            tokenizer = self.inference.tokenizer
-            tokens = [tokenizer.encode(s) for s in raw_input_strs]
-            tokens = block_sequences(tokens, tokenizer.pad_token_id, np.int32, self.blocking_strategy)
-            input_ids = jnp.asarray(tokens, dtype=jnp.int32)
-            attn, pos = initialize_attn_mask_pos_ids(input_ids, tokenizer.pad_token_id, None, None)
-            inputs_embeds, prefix_len = _build_inputs_embeds(self.inference.policy_model, self.inference.policy_params, input_ids, jnp.asarray(patches, dtype=jnp.int32), self.inference.encoder_module, self.inference.encoder_params)
-            full_mask = jnp.concatenate([jnp.ones((attn.shape[0], prefix_len), dtype=attn.dtype), attn], axis=1)
-            outputs = self.inference.policy_model.generate(input_ids=None, inputs_embeds=inputs_embeds, attention_mask=full_mask, params=self.inference.policy_params, prng_key=new_key, generation_config=self.generation_config)
-            raw_output_strs = tokenizer.batch_decode(np.asarray(outputs.sequences), skip_special_tokens=False)
-        except Exception:
-            model_outputs = self.inference.policy_model.generate_from_str if hasattr(self.inference.policy_model, 'generate_from_str') else None
-            base_inf = getattr(self.inference, 'base_inference', None)
-            if base_inf is not None:
-                gen = base_inf.generate_from_str
-            else:
-                # Fallback to plain GPT2Inference interface if available on object.
-                from JaxSeq.models.gpt2.interface import GPT2Inference
-                temp_inf = GPT2Inference.load_inference(params=self.inference.policy_params, model=self.inference.policy_model, tokenizer=self.inference.tokenizer)
-                gen = temp_inf.generate_from_str
-            model_outputs = gen(input_strs=raw_input_strs, prng_key=new_key, blocking_strategy=self.blocking_strategy, generation_config=self.generation_config, input_token_process=self.input_token_process, target_token_process=self.target_token_process, trace=self.trace)
-            raw_output_strs = model_outputs.output_strs
+        # Flax GPT-2 generate() does not support inputs_embeds, so rollouts use text-only generation.
+        # Visual tokens still influence the policy via training gradients through _run_model.
+        if not hasattr(self, '_text_inference'):
+            from JaxSeq.models.gpt2.interface import GPT2Inference
+            self._text_inference = GPT2Inference.load_inference(params=self.inference.policy_params, model=self.inference.policy_model, tokenizer=self.inference.tokenizer)
+        else:
+            self._text_inference = self._text_inference.replace(params=self.inference.policy_params)
+        model_outputs = self._text_inference.generate_from_str(input_strs=raw_input_strs, prng_key=new_key, blocking_strategy=self.blocking_strategy, generation_config=self.generation_config, input_token_process=self.input_token_process, target_token_process=self.target_token_process, trace=self.trace)
+        raw_output_strs = model_outputs.output_strs
         output_strs = ["" if d else self.out_str_process(strip_prompt_from_completion(inp, out)) for inp, out, d in zip(raw_input_strs, raw_output_strs, done)]
         return [None if d else item + (Text(out, True),) for item, out, d in zip(text_history, output_strs, done)]
 
