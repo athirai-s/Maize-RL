@@ -28,7 +28,7 @@ from LLM_RL.algorithms.ppo.base_interface import (
     get_advantages_and_returns, whiten,
 )
 from LLM_RL.algorithms.ppo.data import PPOData
-from llm_rl_scripts.maze.models.local_patch_encoder import LocalPatchCNN
+from llm_rl_scripts.maze.model.local_patch_encoder import LocalPatchCNN
 
 
 def _extract_last_patch_from_history(text_history: TextHistory, patch_size: int) -> np.ndarray:
