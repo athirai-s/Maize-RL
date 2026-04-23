@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:a100:1
+#SBATCH --gres=gpu:a40:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
@@ -21,7 +21,7 @@ CONDA_ENV=/home1/ashanmug/.conda/envs/LLM_RL
 NVDIR=$CONDA_ENV/lib/python3.9/site-packages/nvidia
 export LD_LIBRARY_PATH=$NVDIR/cudnn/lib:$NVDIR/cublas/lib:$NVDIR/cuda_runtime/lib:$NVDIR/cuda_cupti/lib:$NVDIR/cuda_nvrtc/lib:$NVDIR/cufft/lib:$NVDIR/cusolver/lib:$NVDIR/cusparse/lib:$LD_LIBRARY_PATH
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
-export XLA_FLAGS="--xla_gpu_enable_command_buffer="
+export XLA_FLAGS="--xla_gpu_graph_level=0"
 
 cd /project2/jieyuz_1727/Maize-RL/LMRL-Gym
 
