@@ -48,7 +48,7 @@ BC_CKPT=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/po_bc_gpt2_small.2026
     --ppo-data-bsize=16 \
     --gradient-checkpointing \
     --use-fp16-activations \
-    --max-input-length=1016 \
+    --max-input-length=1012 \
     --max-output-length=8 \
     --init-kl-coef=0.05 \
     --kl-target=6.0 \
