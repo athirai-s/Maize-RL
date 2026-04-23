@@ -82,6 +82,41 @@ def _build_inputs_embeds(model: FlaxPreTrainedModel, params: PyTree, input_ids: 
     return jnp.concatenate([visual_embeds, text_embeds], axis=1), prefix_len
 
 
+def _lm_forward_with_embeds(module, input_embeds, attention_mask, position_ids, deterministic, output_attentions, output_hidden_states):
+    transformer = module.transformer
+    pos_embeds = transformer.wpe(position_ids.astype("i4"))
+    hidden_states = input_embeds + pos_embeds
+    hidden_states = transformer.dropout(hidden_states, deterministic=deterministic)
+    outputs = transformer.h(
+        hidden_states,
+        attention_mask,
+        None,
+        None,
+        deterministic=deterministic,
+        init_cache=False,
+        output_attentions=output_attentions,
+        output_hidden_states=output_hidden_states,
+        return_dict=True,
+    )
+    hidden_states = outputs[0]
+    hidden_states = transformer.ln_f(hidden_states)
+    if output_hidden_states:
+        all_hidden_states = outputs[1] + (hidden_states,)
+    else:
+        all_hidden_states = None
+    if module.config.tie_word_embeddings:
+        shared_kernel = transformer.variables["params"]["wte"]["embedding"].T
+        lm_logits = module.lm_head.apply({"params": {"kernel": shared_kernel}}, hidden_states)
+    else:
+        lm_logits = module.lm_head(hidden_states)
+    return FlaxCausalLMOutputWithCrossAttentions(
+        logits=lm_logits,
+        hidden_states=all_hidden_states,
+        attentions=outputs[2] if output_attentions else None,
+        cross_attentions=None,
+    )
+
+
 def _run_model(model, params, input_ids, attention_mask, local_patch, encoder_module, encoder_params, dropout_rng=None, train=False, output_hidden_states=True, output_attentions=None):
     inputs_embeds, prefix_len = _build_inputs_embeds(model, params, input_ids, local_patch, encoder_module, encoder_params)
     batch_size, total_len, _ = inputs_embeds.shape
@@ -90,16 +125,17 @@ def _run_model(model, params, input_ids, attention_mask, local_patch, encoder_mo
         prefix_mask = jnp.ones((batch_size, prefix_len), dtype=attention_mask.dtype)
         attention_mask = jnp.concatenate([prefix_mask, attention_mask], axis=1)
     position_ids = jnp.broadcast_to(jnp.arange(total_len)[None, :], (batch_size, total_len))
-    model_output = model(
-        input_ids=None,
-        inputs_embeds=inputs_embeds,
-        attention_mask=attention_mask,
-        position_ids=position_ids,
-        params=params,
-        dropout_rng=dropout_rng,
-        train=train,
-        output_hidden_states=output_hidden_states,
-        output_attentions=output_attentions,
+    rngs = {"dropout": dropout_rng} if (dropout_rng is not None and train) else None
+    model_output = model.module.apply(
+        {"params": params},
+        inputs_embeds,
+        attention_mask,
+        position_ids,
+        not train,
+        bool(output_attentions),
+        bool(output_hidden_states),
+        rngs=rngs,
+        method=_lm_forward_with_embeds,
     )
     # Crop to text-aligned positions so downstream token-logprob code still works.
     cropped_logits = model_output.logits[:, prefix_len:prefix_len + text_len, :]
