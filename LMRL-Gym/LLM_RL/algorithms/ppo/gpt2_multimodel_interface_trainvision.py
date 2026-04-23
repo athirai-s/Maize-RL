@@ -27,7 +27,7 @@ from LLM_RL.algorithms.ppo.base_interface import (
     CombinedTokenTrajectoryChain, get_action_state_next_state_idxs,
     get_advantages_and_returns, whiten,
 )
-from LLM_RL.algorithms.ppo.data import PPOData
+from LLM_RL.algorithms.ppo.data_multimodal import PPOData
 from llm_rl_scripts.maze.model.local_patch_encoder import LocalPatchCNN
 
 
