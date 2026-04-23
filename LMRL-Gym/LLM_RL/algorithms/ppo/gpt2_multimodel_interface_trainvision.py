@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import List, Optional, Callable, Any
+from typing import List, Optional, Callable, Any, NamedTuple
 from functools import partial
 
 import jax
