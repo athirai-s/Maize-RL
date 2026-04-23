@@ -2,7 +2,7 @@
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:a40:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
+#SBATCH --mem=128G
 #SBATCH --time=12:00:00
 #SBATCH --job-name=maze_ppo_po_mm_bc
 #SBATCH --output=logs/maze_ppo_po_mm_bc_%j.out
@@ -31,7 +31,8 @@ mkdir -p /scratch1/ashanmug/maize-rl/outputs/ppo_po_mm_from_bc
 BC_CKPT=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/po_bc_gpt2_small.2026-04-22-19-16-19.436.bdfc01ac3e7f11f18ff770b5e8f03870/best
 
 /home1/ashanmug/.conda/envs/LLM_RL/bin/python -m llm_rl_scripts.maze.ppo.partially_observed_ppo_online_trainvision_revised \
-    PARAMS "$BC_CKPT" \
+    --model-load-mode=PARAMS \
+    --model-load-path="$BC_CKPT" \
     --outputs-path=/scratch1/ashanmug/maize-rl/outputs/ppo_po_mm_from_bc/ \
     --exp-name=ppo_po_mm_from_bc \
     --maze-name=double_t_maze \
@@ -61,7 +62,6 @@ BC_CKPT=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/po_bc_gpt2_small.2026
     --save-every-rounds=10 \
     --log-every=32 \
     --no-save-train-state \
-    --use-visual-patch \
     --patch-size=3 \
     --num-visual-tokens=4 \
     --no-print-local-patch
