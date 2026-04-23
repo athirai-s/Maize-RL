@@ -37,14 +37,16 @@ BC_CKPT=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/po_bc_gpt2_small.2026
     --maze-name=double_t_maze \
     --describe-function=describe_observation_only_walls \
     --reward-function=standard_reward \
-    --n-rounds=50 \
+    --n-rounds=30 \
     --epochs=1 \
     --lr=1e-7 \
-    --train-bsize=16 \
-    --grad-accum-steps=8 \
-    --rollout-bsize=32 \
+    --train-bsize=8 \
+    --grad-accum-steps=16 \
+    --rollout-bsize=16 \
     --n-rollouts=512 \
-    --ppo-data-bsize=32 \
+    --ppo-data-bsize=16 \
+    --gradient-checkpointing \
+    --use-fp16-activations \
     --max-input-length=1016 \
     --max-output-length=8 \
     --init-kl-coef=0.05 \
