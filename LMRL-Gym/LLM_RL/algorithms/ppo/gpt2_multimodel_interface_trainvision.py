@@ -446,13 +446,9 @@ class GPT2PPOPolicyMultimodal(PPOPolicy):
         new_key = None
         if self.prng_key is not None:
             self.prng_key, new_key = jax.random.split(self.prng_key)
-        # Flax GPT-2 generate() does not support inputs_embeds, so rollouts use text-only generation.
-        # Visual tokens still influence the policy via training gradients through _run_model.
-        if not hasattr(self, '_text_inference'):
+        if getattr(self, '_text_inference', None) is None:
             from JaxSeq.models.gpt2.interface import GPT2Inference
             self._text_inference = GPT2Inference.load_inference(params=self.inference.policy_params, model=self.inference.policy_model, tokenizer=self.inference.tokenizer)
-        else:
-            self._text_inference = self._text_inference.replace(params=self.inference.policy_params)
         model_outputs = self._text_inference.generate_from_str(input_strs=raw_input_strs, prng_key=new_key, blocking_strategy=self.blocking_strategy, generation_config=self.generation_config, input_token_process=self.input_token_process, target_token_process=self.target_token_process, trace=self.trace)
         raw_output_strs = model_outputs.output_strs
         output_strs = ["" if d else self.out_str_process(strip_prompt_from_completion(inp, out)) for inp, out, d in zip(raw_input_strs, raw_output_strs, done)]
@@ -460,3 +456,5 @@ class GPT2PPOPolicyMultimodal(PPOPolicy):
 
     def set_params(self, policy_params: PyTree) -> None:
         self.inference = self.inference.replace(policy_params=policy_params)
+        if getattr(self, '_text_inference', None) is not None:
+            self._text_inference = self._text_inference.replace(params=policy_params)
