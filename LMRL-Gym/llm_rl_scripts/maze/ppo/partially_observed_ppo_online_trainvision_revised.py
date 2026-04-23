@@ -19,7 +19,7 @@ from jaxtyping import PyTree
 import re
 from LLM_RL.environment import Text, TokenHistory, text_env_eval, TextTrajectory, TextTrajectoryChain
 from LLM_RL.algorithms.ppo.gpt2_multimodel_interface_trainvision import GPT2PPOInference, GPT2PPOTrain, GPT2PPOPolicyMultimodal
-from LLM_RL.heads.linear_head import LinearHeadConfig
+from LLM_RL.heads.linear_head import LinearHeadConfig, load_train_state_from_config as load_head_train_state_from_config
 from JaxSeq.shard_model import shard_params_from_params
 from LLM_RL.algorithms.ppo.data import PPODataset
 from LLM_RL.utils import get_tensor_stats_np
