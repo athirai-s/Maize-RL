@@ -1,4 +1,4 @@
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Optional
 from llm_rl_scripts.maze.env.env import MazeEnv, describe_observation, describe_observation_give_position, illegal_penalty_reward, illegal_penalty_diff_scale, manhatten_actions, standard_reward, describe_observation_only_walls
 from llm_rl_scripts.maze.env.mazes import double_t_maze_optimal_directions, maze2d_umaze, double_t_maze
 import numpy as np
@@ -6,7 +6,7 @@ from LLM_RL.environment import Text
 from collections import deque
 from IPython import embed
 
-def setup_maze_env(maze_name, describe_function, reward_function=None, last_k=1, max_steps=100):
+def setup_maze_env(maze_name, describe_function, reward_function=None, last_k=1, max_steps=100, patch_size: Optional[int] = None, print_local_patch: bool = False):
     # setup environment
     if maze_name == 'umaze':
         maze = maze2d_umaze()
@@ -39,16 +39,31 @@ def setup_maze_env(maze_name, describe_function, reward_function=None, last_k=1,
     else:
         raise ValueError(f'unknown reward function: {reward_function}')
     
-    env = MazeEnv(
-        maze=maze, 
-        valid_goals=valid_goals, 
-        actions=manhatten_actions, 
-        max_steps=max_steps, 
-        display_initial_position=True,
-        describe_function=describe_function,
-        reward_function=reward_function,
-        last_k=last_k,
-    )
+    if patch_size is not None:
+        from llm_rl_scripts.maze.env.env_image_patch_revised import MazeEnv as MazeEnvVisual
+        env = MazeEnvVisual(
+            maze=maze,
+            valid_goals=valid_goals,
+            actions=manhatten_actions,
+            max_steps=max_steps,
+            display_initial_position=True,
+            describe_function=describe_function,
+            reward_function=reward_function,
+            last_k=last_k,
+            patch_size=patch_size,
+            print_local_patch=print_local_patch,
+        )
+    else:
+        env = MazeEnv(
+            maze=maze,
+            valid_goals=valid_goals,
+            actions=manhatten_actions,
+            max_steps=max_steps,
+            display_initial_position=True,
+            describe_function=describe_function,
+            reward_function=reward_function,
+            last_k=last_k,
+        )
     return env
 
 def pick_start_position(maze_name):

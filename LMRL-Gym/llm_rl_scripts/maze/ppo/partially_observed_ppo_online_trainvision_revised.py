@@ -18,8 +18,7 @@ from transformers.generation import GenerationConfig
 from jaxtyping import PyTree
 import re
 from LLM_RL.environment import Text, TokenHistory, text_env_eval, TextTrajectory, TextTrajectoryChain
-from LLM_RL.algorithms.ppo.gpt2_multimodal.interface import GPT2PPOInference, GPT2PPOTrain, GPT2PPOPolicyMultimodal
-from LLM_RL.heads.linear_head import load_train_state_from_config as load_head_train_state_from_config
+from LLM_RL.algorithms.ppo.gpt2_multimodel_interface_trainvision import GPT2PPOInference, GPT2PPOTrain, GPT2PPOPolicyMultimodal
 from LLM_RL.heads.linear_head import LinearHeadConfig
 from JaxSeq.shard_model import shard_params_from_params
 from LLM_RL.algorithms.ppo.data import PPODataset
@@ -38,7 +37,7 @@ from JaxSeq.utils import block_sequences
 from llm_rl_scripts.maze.env.maze_utils import setup_maze_env, pick_start_position
 
 # NEW: VISUAL
-from llm_rl_scripts.maze.models.local_patch_encoder import LocalPatchCNN  # noqa: F401
+from llm_rl_scripts.maze.model.local_patch_encoder import LocalPatchCNN  # noqa: F401
 
 
 def _build_generation_config(
@@ -263,30 +262,6 @@ def main(
         max_length=max_input_length,
     )
 
-    # NEW: VISUAL
-    # Training/evaluation rollouts must use the same multimodal policy wrapper
-    if use_visual_patch:
-        multimodal_policy_inference = GPT2PPOInferenceMultimodal.from_base_inference(
-            base_inference=policy_inference,
-            patch_size=patch_size,
-            num_visual_tokens=num_visual_tokens,
-        )
-        policy = GPT2PPOPolicyMultimodal(
-            inference=multimodal_policy_inference,
-            prng_key=policy_prng,
-            generation_config=generation_config,
-            blocking_strategy=policy_blocking_strategy,
-            out_str_process=lambda x: x.removesuffix('\n') + '\n',
-        )
-    else:
-        policy = GPT2PPOPolicy(
-            inference=policy_inference,
-            prng_key=policy_prng,
-            generation_config=generation_config,
-            blocking_strategy=policy_blocking_strategy,
-            out_str_process=lambda x: x.removesuffix('\n') + '\n',
-        )
-
     def value_head_optim_getter(params: PyTree):
         mask = get_weight_decay_mask(("bias",))(params)
         return optax.MultiSteps(
@@ -374,7 +349,7 @@ def main(
 
     data_round = 0
 
-    def ppo_dataset_loader(ppo_inference: GPT2PPOInference, policy: GPT2PPOPolicy) -> PPODataset:
+    def ppo_dataset_loader(ppo_inference: GPT2PPOInference, policy: GPT2PPOPolicyMultimodal) -> PPODataset:
         if reranker_policy:
             print("reranker policy!")
             policy = ReRankerSamplePolicy(

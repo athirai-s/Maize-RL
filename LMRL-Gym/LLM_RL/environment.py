@@ -13,6 +13,7 @@ from copy import deepcopy
 class Text:
     text: str
     is_action: bool
+    extras: Optional[Dict[str, Any]] = None
 
 TextHistory = Tuple[Text, ...]
 text_history_to_str = lambda text_history: ''.join(map(lambda x: x.text, text_history))
