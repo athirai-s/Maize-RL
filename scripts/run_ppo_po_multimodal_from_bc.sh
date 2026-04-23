@@ -2,7 +2,7 @@
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:a40:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=96G
+#SBATCH --mem=128G
 #SBATCH --time=12:00:00
 #SBATCH --job-name=maze_ppo_po_mm_bc
 #SBATCH --output=logs/maze_ppo_po_mm_bc_%j.out
@@ -44,7 +44,7 @@ BC_CKPT=/scratch1/ashanmug/maize-rl/outputs/bc_po_baseline/po_bc_gpt2_small.2026
     --train-bsize=4 \
     --grad-accum-steps=32 \
     --rollout-bsize=16 \
-    --n-rollouts=512 \
+    --n-rollouts=256 \
     --ppo-data-bsize=16 \
     --gradient-checkpointing \
     --use-fp16-activations \
