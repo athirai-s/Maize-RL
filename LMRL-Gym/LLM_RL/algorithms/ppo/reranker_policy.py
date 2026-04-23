@@ -11,7 +11,9 @@ class ReRankerSamplePolicy(TextPolicy):
     def act(self, text_history: TextHistory) -> TextHistory:
         proposals = self.proposal_fn(text_history)
         scores = np.asarray(self.score_fn(proposals), dtype=np.float32)
-        # sample from scores
+        # sample from scores (numerically stable softmax; zero-out NaN/inf)
+        scores = np.nan_to_num(scores, nan=-1e9, posinf=1e9, neginf=-1e9)
+        scores = scores - scores.max()
         scores = np.exp(scores) / np.exp(scores).sum()
         selected = np.random.choice(len(scores), p=scores)
         # # zip proposals and scores together
