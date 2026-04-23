@@ -151,12 +151,8 @@ def build_visual_extras(
         pad_value=1,
         mark_agent=True,
     )
-    patch_img = render_patch_image(patch)
     return {
         "local_patch": patch.astype(np.int32),
-        "local_patch_ascii": render_patch_ascii(patch),
-        "local_patch_image": patch_img,
-        "local_patch_image_array": np.array(patch_img, dtype=np.uint8),
         "agent_position": tuple(position),
     }
 
