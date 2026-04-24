@@ -397,8 +397,10 @@ def main(
                         done=transition.done,
                     )
                     curr_chain.append(text_trajectory)
-                except Exception:
-                    embed()
+                except Exception as _e:
+                    import traceback
+                    traceback.print_exc()
+                    raise
 
             chain = None
             for text_trajectory in curr_chain[::-1]:

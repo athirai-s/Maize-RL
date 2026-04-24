@@ -363,7 +363,7 @@ class GPT2PPOInference(PPOInference):
         if token_process is None:
             token_process = lambda x: x
         token_trajectory_chains = [TokenTrajectoryChain.from_text_trajectory_chain(item, self.tokenizer, token_process=token_process) for item in text_trajectory_chains]
-        patch_chunks = _extract_chain_patches(text_trajectory_chains, self.patch_size)
+        patch_chunks = _extract_chain_patches(text_trajectory_chains, getattr(self, 'patch_size', 3))
 
         n_chains = len(token_trajectory_chains)
         tokens = []
